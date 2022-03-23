@@ -6,13 +6,13 @@ import (
 	"github.com/icholy/exp/slices"
 )
 
-func Merge[T any](ctx context.Context, chans ...Chan[T]) Chan[T] {
-	ch := make(Chan[T])
+func Merge[T any](ctx context.Context, chans ...chan T) chan T {
+	ch := make(chan T)
 	go merge(ctx, ch, chans)
 	return ch
 }
 
-func merge[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge[T any](ctx context.Context, out chan T, chans []chan T) {
 	switch len(chans) {
 	case 1:
 		merge1(ctx, out, chans)
@@ -31,9 +31,9 @@ func merge[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 	}
 }
 
-func merge1[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge1[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
-		var r Result[T]
+		var r T
 		select {
 		case r = <-chans[0]:
 		case <-ctx.Done():
@@ -47,9 +47,9 @@ func merge1[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 	}
 }
 
-func merge2[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge2[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
-		var r Result[T]
+		var r T
 		select {
 		case r = <-chans[0]:
 		case r = <-chans[1]:
@@ -64,9 +64,9 @@ func merge2[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 	}
 }
 
-func merge3[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge3[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
-		var r Result[T]
+		var r T
 		select {
 		case r = <-chans[0]:
 		case r = <-chans[1]:
@@ -82,9 +82,9 @@ func merge3[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 	}
 }
 
-func merge4[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge4[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
-		var r Result[T]
+		var r T
 		select {
 		case r = <-chans[0]:
 		case r = <-chans[1]:
@@ -101,9 +101,9 @@ func merge4[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 	}
 }
 
-func merge5[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
+func merge5[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
-		var r Result[T]
+		var r T
 		select {
 		case r = <-chans[0]:
 		case r = <-chans[1]:
