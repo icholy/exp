@@ -7,7 +7,7 @@ func Batch[T any](s []T, size int) [][]T {
 		if l := len(s); l < n {
 			n = l
 		}
-		b = append(b, s[:n])
+		b = append(b, s[:n:n])
 		s = s[n:]
 	}
 	return b
