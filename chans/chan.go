@@ -9,9 +9,17 @@ type Result[T any] struct {
 
 type Chan[T any] chan Result[T]
 
-func (c Chan[T]) Recv() (T, error) {
-	r := <-c
-	return r.Value, r.Err
+func (c Chan[T]) Recv(ctx context.Context) (T, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	select {
+	case r := <-c:
+		return r.Value, r.Err
+	case <-ctx.Done():
+		var z T
+		return z, ctx.Err()
+	}
 }
 
 func Go[T any](ctx context.Context, f func() (T, error)) Chan[T] {

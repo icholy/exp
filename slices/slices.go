@@ -45,3 +45,11 @@ func AppendFilter[T any](dst []T, src []T,  f func(T) bool) []T {
 func Filter[T any](s []T, f func(T) bool) []T {
 	return AppendFilter(nil, s, f)
 }
+
+func Map[T any, U any](s []T, f func(T) U) []U {
+	r := make([]U, len(s))
+	for i, v := range s {
+		r[i] = f(v)
+	}
+	return r
+}
