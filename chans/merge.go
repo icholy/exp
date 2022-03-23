@@ -24,6 +24,10 @@ func merge[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 		merge4(ctx, out, chans)
 	case 5:
 		merge5(ctx, out, chans)
+	default:
+		for _, batch := range slices.Batch(chans, 5) {
+			go merge(ctx, out, batch)
+		}
 	}
 }
 
@@ -114,11 +118,5 @@ func merge5[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
 		case <-ctx.Done():
 			return
 		}
-	}
-}
-
-func mergeN[T any](ctx context.Context, out Chan[T], chans []Chan[T]) {
-	for _, batch := range slices.Batch(chans, 5) {
-		go merge(ctx, out, batch)
 	}
 }
