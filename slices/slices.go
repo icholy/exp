@@ -21,3 +21,27 @@ func GroupBy[T any, K comparable](s []T, f func(T) K) map[K][]T {
     }
     return m
 }
+
+func InPlaceFilter[T any](s []T, f func(T) bool) []T {
+	i := 0
+	for _, v := range s {
+		if f(v) {
+			s[i] = v
+			i++
+		}
+	}
+	return s[:i]
+}
+
+func AppendFilter[T any](dst []T, src []T,  f func(T) bool) []T {
+	for _, v := range src {
+		if f(v) {
+			dst = append(dst, v)
+		}
+	}
+	return dst
+}
+
+func Filter[T any](s []T, f func(T) bool) []T {
+	return AppendFilter(nil, s, f)
+}
