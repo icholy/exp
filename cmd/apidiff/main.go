@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/exp/apidiff"
+	"github.com/icholy/exp/apidiff"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/go/gcexportdata"
 	"golang.org/x/tools/go/packages"
