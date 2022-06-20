@@ -3,11 +3,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
 	"go/token"
 	"go/types"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/exp/apidiff"
@@ -89,16 +92,22 @@ func mustLoadOrRead(importPathOrFile string) *types.Package {
 }
 
 func mustLoadPackage(importPath string) *packages.Package {
-	pkg, err := loadPackage(importPath)
-	if err != nil {
-		die("loading %s: %v", importPath, err)
+	pkg, err := loadPackage(importPath, "")
+	if err == nil {
+		return pkg
 	}
-	return pkg
+	pkg, err = downloadPackage(importPath)
+	if err == nil {
+		return pkg
+	}
+	die("loading %s: %v", importPath, err)
+	panic("unreachable")
 }
 
-func loadPackage(importPath string) (*packages.Package, error) {
-	cfg := &packages.Config{Mode: packages.LoadTypes |
-		packages.NeedName | packages.NeedTypes | packages.NeedImports | packages.NeedDeps,
+func loadPackage(importPath, dir string) (*packages.Package, error) {
+	cfg := &packages.Config{
+		Dir:  dir,
+		Mode: packages.LoadTypes | packages.NeedName | packages.NeedTypes | packages.NeedImports | packages.NeedDeps,
 	}
 	pkgs, err := packages.Load(cfg, importPath)
 	if err != nil {
@@ -160,4 +169,31 @@ func isInternalPackage(pkgPath string) bool {
 		return true
 	}
 	return false
+}
+
+func downloadPackage(importPath string) (*packages.Package, error) {
+	tmp, err := os.MkdirTemp(os.TempDir(), "")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmp)
+	cmd := exec.Command("go", "mod", "init", "tmp")
+	cmd.Dir = tmp
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+	var src bytes.Buffer
+	src.WriteString("package tmp\n")
+	src.WriteString("import _ \"" + importPath + "\"\n")
+	src.WriteString("func main() {}\n")
+	path := filepath.Join(tmp, "main.go")
+	if err := os.WriteFile(path, src.Bytes(), os.ModePerm); err != nil {
+		return nil, err
+	}
+	cmd = exec.Command("go", "get")
+	cmd.Dir = tmp
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+	return loadPackage(importPath, tmp)
 }
