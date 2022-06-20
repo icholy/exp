@@ -3,7 +3,7 @@ module github.com/icholy/exp
 go 1.18
 
 require (
-	golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d
+	github.com/google/go-cmp v0.5.8
 	golang.org/x/tools v0.1.11
 )
 
