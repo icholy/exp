@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"golang.org/x/exp/apidiff"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/go/gcexportdata"
 	"golang.org/x/tools/go/packages"
 )
@@ -57,8 +58,17 @@ func main() {
 			flag.Usage()
 			os.Exit(2)
 		}
-		oldpkg := mustLoadOrRead(flag.Arg(0))
-		newpkg := mustLoadOrRead(flag.Arg(1))
+		var oldpkg, newpkg *types.Package
+		var g errgroup.Group
+		g.Go(func() error {
+			oldpkg = mustLoadOrRead(flag.Arg(0))
+			return nil
+		})
+		g.Go(func() error {
+			newpkg = mustLoadOrRead(flag.Arg(1))
+			return nil
+		})
+		_ = g.Wait()
 		if !*allowInternal {
 			if isInternalPackage(oldpkg.Path()) && isInternalPackage(newpkg.Path()) {
 				fmt.Fprintf(os.Stderr, "Ignoring internal package %s\n", oldpkg.Path())
