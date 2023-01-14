@@ -7,6 +7,12 @@ import (
 )
 
 func Race[T any](ctx context.Context, chans ...Chan[T]) (T, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	return race(ctx, chans)
+}
+
+func race[T any](ctx context.Context, chans []Chan[T]) (T, error) {
 	var r Result[T]
 	switch len(chans) {
 	case 1:
@@ -92,7 +98,7 @@ func raceN[T any](ctx context.Context, chans []Chan[T]) Result[T] {
 			ch := make(Chan[T])
 			go func() {
 				var r Result[T]
-				r.Value, r.Err = Race(ctx, batch...)
+				r.Value, r.Err = race(ctx, batch)
 				select {
 				case ch <- r:
 				case <-ctx.Done():
@@ -102,6 +108,6 @@ func raceN[T any](ctx context.Context, chans []Chan[T]) Result[T] {
 		},
 	)
 	var r Result[T]
-	r.Value, r.Err = Race(ctx, bchans...)
+	r.Value, r.Err = race(ctx, bchans)
 	return r
 }
