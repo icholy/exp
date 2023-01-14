@@ -2,6 +2,7 @@ package chans
 
 import (
 	"context"
+	"sync"
 
 	"github.com/icholy/exp/slices"
 )
@@ -28,9 +29,16 @@ func merge[T any](ctx context.Context, out chan T, chans []chan T) {
 	case 5:
 		merge5(ctx, out, chans)
 	default:
+		var wg sync.WaitGroup
 		for _, batch := range slices.Batch(chans, 5) {
-			go merge(ctx, out, batch)
+			wg.Add(1)
+			batch := batch
+			go func() {
+				defer wg.Done()
+				merge(ctx, out, batch)
+			}()
 		}
+		wg.Wait()
 	}
 }
 
