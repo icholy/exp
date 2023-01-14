@@ -1,7 +1,6 @@
 package chans
 
 import (
-	"context"
 	"testing"
 
 	"github.com/icholy/exp/internal/assert"
@@ -10,7 +9,6 @@ import (
 
 func TestMerge1(t *testing.T) {
 	m := Merge(
-		context.Background(),
 		sliceToChan([]string{"a", "b", "c"}),
 	)
 	assert.DeepEqual(t, []string{"a", "b", "c"}, chanToSlice(m))
@@ -18,7 +16,6 @@ func TestMerge1(t *testing.T) {
 
 func TestMerge2(t *testing.T) {
 	m := Merge(
-		context.Background(),
 		sliceToChan([]int{1, 2, 3}),
 		sliceToChan([]int{4, 5, 6}),
 	)
