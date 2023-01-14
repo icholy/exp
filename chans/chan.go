@@ -20,12 +20,20 @@ func (c Chan[T]) Recv() (T, error) {
 
 func Go[T any](g *errgroup.Group, f func() (T, error)) Chan[T] {
 	ch := make(Chan[T], 1)
-	g.Go(func() error {
-		var r Result[T]
-		r.Value, r.Err = f()
-		ch <- r
-		return r.Err
-	})
+	if g == nil {
+		go func() {
+			var r Result[T]
+			r.Value, r.Err = f()
+			ch <- r
+		}()
+	} else {
+		g.Go(func() error {
+			var r Result[T]
+			r.Value, r.Err = f()
+			ch <- r
+			return r.Err
+		})
+	}
 	return ch
 }
 
