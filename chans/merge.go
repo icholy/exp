@@ -8,7 +8,10 @@ import (
 
 func Merge[T any](ctx context.Context, chans ...chan T) chan T {
 	ch := make(chan T)
-	go merge(ctx, ch, chans)
+	go func() {
+		defer close(ch)
+		merge(ctx, ch, chans)
+	}()
 	return ch
 }
 
