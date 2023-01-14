@@ -3,7 +3,7 @@ package chans
 import (
 	"context"
 
-    "github.com/icholy/exp/slices"
+	"github.com/icholy/exp/slices"
 )
 
 func Race[T any](ctx context.Context, chans ...Chan[T]) (T, error) {
@@ -26,28 +26,28 @@ func Race[T any](ctx context.Context, chans ...Chan[T]) (T, error) {
 }
 
 func race1[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    var r Result[T]
+	var r Result[T]
 	select {
 	case r = <-chans[0]:
 	case <-ctx.Done():
 		return Result[T]{Err: ctx.Err()}
 	}
-    return r
+	return r
 }
 
 func race2[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    var r Result[T]
+	var r Result[T]
 	select {
 	case r = <-chans[0]:
 	case r = <-chans[1]:
 	case <-ctx.Done():
 		return Result[T]{Err: ctx.Err()}
 	}
-    return r
+	return r
 }
 
 func race3[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    var r Result[T]
+	var r Result[T]
 	select {
 	case r = <-chans[0]:
 	case r = <-chans[1]:
@@ -55,11 +55,11 @@ func race3[T any](ctx context.Context, chans []Chan[T]) Result[T] {
 	case <-ctx.Done():
 		return Result[T]{Err: ctx.Err()}
 	}
-    return r
+	return r
 }
 
 func race4[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    var r Result[T]
+	var r Result[T]
 	select {
 	case r = <-chans[0]:
 	case r = <-chans[1]:
@@ -68,11 +68,11 @@ func race4[T any](ctx context.Context, chans []Chan[T]) Result[T] {
 	case <-ctx.Done():
 		return Result[T]{Err: ctx.Err()}
 	}
-    return r
+	return r
 }
 
 func race5[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    var r Result[T]
+	var r Result[T]
 	select {
 	case r = <-chans[0]:
 	case r = <-chans[1]:
@@ -82,25 +82,25 @@ func race5[T any](ctx context.Context, chans []Chan[T]) Result[T] {
 	case <-ctx.Done():
 		return Result[T]{Err: ctx.Err()}
 	}
-    return r
+	return r
 }
 
 func raceN[T any](ctx context.Context, chans []Chan[T]) Result[T] {
-    bchans := slices.Map(
-        slices.Batch(chans, 5),
-        func(batch []Chan[T]) Chan[T] {
-            ch := make(Chan[T])
-            go func() {
-                var r Result[T]
-                r.Value, r.Err = Race(ctx, batch...)
-                select {
-                case ch <- r:
-                case <-ctx.Done():
-                }
-            }()
-            return ch
-        },
-    )
+	bchans := slices.AppendMap(nil,
+		slices.Batch(chans, 5),
+		func(batch []Chan[T]) Chan[T] {
+			ch := make(Chan[T])
+			go func() {
+				var r Result[T]
+				r.Value, r.Err = Race(ctx, batch...)
+				select {
+				case ch <- r:
+				case <-ctx.Done():
+				}
+			}()
+			return ch
+		},
+	)
 	var r Result[T]
 	r.Value, r.Err = Race(ctx, bchans...)
 	return r

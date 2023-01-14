@@ -1,6 +1,10 @@
 package chans
 
-import "context"
+import (
+	"context"
+
+	"golang.org/x/sync/errgroup"
+)
 
 type Result[T any] struct {
 	Value T
@@ -9,29 +13,28 @@ type Result[T any] struct {
 
 type Chan[T any] chan Result[T]
 
-func (c Chan[T]) Recv(ctx context.Context) (T, error) {
-	if ctx == nil {
-		r := <-c
-		return r.Value, r.Err
-	}
+func (c Chan[T]) Recv() (T, error) {
+	r := <-c
+	return r.Value, r.Err
+}
+
+func Go[T any](g *errgroup.Group, f func() (T, error)) Chan[T] {
+	ch := make(Chan[T], 1)
+	g.Go(func() error {
+		var r Result[T]
+		r.Value, r.Err = f()
+		ch <- r
+		return r.Err
+	})
+	return ch
+}
+
+func Recv[T any](ctx context.Context, ch Chan[T]) (T, error) {
 	select {
-	case r := <-c:
+	case r := <-ch:
 		return r.Value, r.Err
 	case <-ctx.Done():
 		var z T
 		return z, ctx.Err()
 	}
-}
-
-func Go[T any](ctx context.Context, f func() (T, error)) Chan[T] {
-	ch := make(Chan[T])
-	go func() {
-		var r Result[T]
-		r.Value, r.Err = f()
-		select {
-		case ch <- r:
-		case <-ctx.Done():
-		}
-	}()
-	return ch
 }
