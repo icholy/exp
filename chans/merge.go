@@ -6,8 +6,8 @@ import (
 	"github.com/icholy/exp/slices"
 )
 
-func Merge[T any](chans ...chan T) chan T {
-	ch := make(chan T)
+func Merge[T any, C ~chan T](chans ...C) C {
+	ch := make(C)
 	go func() {
 		defer close(ch)
 		merge(ch, chans)
@@ -15,11 +15,11 @@ func Merge[T any](chans ...chan T) chan T {
 	return ch
 }
 
-func without[T any](chans []chan T, i int) []chan T {
-	return slices.AppendDelete(nil, chans, i, i+1)
+func without[T any](s []T, i int) []T {
+	return slices.AppendDelete(nil, s, i, i+1)
 }
 
-func merge[T any](out chan T, chans []chan T) {
+func merge[T any, C ~chan T](out C, chans []C) {
 	switch len(chans) {
 	case 1:
 		merge1(out, chans)
@@ -45,7 +45,7 @@ func merge[T any](out chan T, chans []chan T) {
 	}
 }
 
-func merge1[T any](out chan T, chans []chan T) {
+func merge1[T any, C ~chan T](out C, chans []C) {
 	for {
 		r, ok := <-chans[0]
 		if !ok {
@@ -55,7 +55,7 @@ func merge1[T any](out chan T, chans []chan T) {
 	}
 }
 
-func merge2[T any](out chan T, chans []chan T) {
+func merge2[T any, C ~chan T](out C, chans []C) {
 	for {
 		var i int
 		var r T
@@ -74,7 +74,7 @@ func merge2[T any](out chan T, chans []chan T) {
 	}
 }
 
-func merge3[T any](out chan T, chans []chan T) {
+func merge3[T any, C ~chan T](out C, chans []C) {
 	for {
 		var i int
 		var r T
@@ -95,7 +95,7 @@ func merge3[T any](out chan T, chans []chan T) {
 	}
 }
 
-func merge4[T any](out chan T, chans []chan T) {
+func merge4[T any, C ~chan T](out C, chans []C) {
 	for {
 		var i int
 		var r T
@@ -118,7 +118,7 @@ func merge4[T any](out chan T, chans []chan T) {
 	}
 }
 
-func merge5[T any](out chan T, chans []chan T) {
+func merge5[T any, C ~chan T](out C, chans []C) {
 	for {
 		var i int
 		var r T
