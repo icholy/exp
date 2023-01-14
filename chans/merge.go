@@ -34,10 +34,14 @@ func merge[T any](ctx context.Context, out chan T, chans []chan T) {
 func merge1[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
 		var r T
+		var ok bool
 		select {
-		case r = <-chans[0]:
+		case r, ok = <-chans[0]:
 		case <-ctx.Done():
-		return
+			return
+		}
+		if !ok {
+			return
 		}
 		select {
 		case out <- r:
@@ -49,12 +53,20 @@ func merge1[T any](ctx context.Context, out chan T, chans []chan T) {
 
 func merge2[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
+		var i int
 		var r T
+		var ok bool
 		select {
-		case r = <-chans[0]:
-		case r = <-chans[1]:
+		case r, ok = <-chans[0]:
+			i = 0
+		case r, ok = <-chans[1]:
+			i = 1
 		case <-ctx.Done():
-		return
+			return
+		}
+		if !ok {
+			merge1(ctx, out, without(chans, i))
+			return
 		}
 		select {
 		case out <- r:
@@ -64,15 +76,28 @@ func merge2[T any](ctx context.Context, out chan T, chans []chan T) {
 	}
 }
 
+func without[T any](chans []chan T, i int) []chan T {
+	return slices.AppendDelete(chans, chans, i, i+1)
+}
+
 func merge3[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
+		var i int
 		var r T
+		var ok bool
 		select {
-		case r = <-chans[0]:
-		case r = <-chans[1]:
-		case r = <-chans[2]:
+		case r, ok = <-chans[0]:
+			i = 0
+		case r, ok = <-chans[1]:
+			i = 1
+		case r, ok = <-chans[2]:
+			i = 2
 		case <-ctx.Done():
-		return
+			return
+		}
+		if !ok {
+			merge2(ctx, out, without(chans, i))
+			return
 		}
 		select {
 		case out <- r:
@@ -84,14 +109,24 @@ func merge3[T any](ctx context.Context, out chan T, chans []chan T) {
 
 func merge4[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
+		var i int
 		var r T
+		var ok bool
 		select {
-		case r = <-chans[0]:
-		case r = <-chans[1]:
-		case r = <-chans[2]:
-		case r = <-chans[3]:
+		case r, ok = <-chans[0]:
+			i = 0
+		case r, ok = <-chans[1]:
+			i = 1
+		case r, ok = <-chans[2]:
+			i = 2
+		case r, ok = <-chans[3]:
+			i = 3
 		case <-ctx.Done():
-		return
+			return
+		}
+		if !ok {
+			merge3(ctx, out, without(chans, i))
+			return
 		}
 		select {
 		case out <- r:
@@ -103,15 +138,21 @@ func merge4[T any](ctx context.Context, out chan T, chans []chan T) {
 
 func merge5[T any](ctx context.Context, out chan T, chans []chan T) {
 	for {
+		var i int
 		var r T
+		var ok bool
 		select {
-		case r = <-chans[0]:
-		case r = <-chans[1]:
-		case r = <-chans[2]:
-		case r = <-chans[3]:
-		case r = <-chans[4]:
+		case r, ok = <-chans[0]:
+		case r, ok = <-chans[1]:
+		case r, ok = <-chans[2]:
+		case r, ok = <-chans[3]:
+		case r, ok = <-chans[4]:
 		case <-ctx.Done():
-		return
+			return
+		}
+		if !ok {
+			merge4(ctx, out, without(chans, i))
+			return
 		}
 		select {
 		case out <- r:
