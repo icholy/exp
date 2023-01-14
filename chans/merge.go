@@ -16,7 +16,7 @@ func Merge[T any](chans ...chan T) chan T {
 }
 
 func without[T any](chans []chan T, i int) []chan T {
-	return slices.AppendDelete(chans, chans, i, i+1)
+	return slices.AppendDelete(nil, chans, i, i+1)
 }
 
 func merge[T any](out chan T, chans []chan T) {
