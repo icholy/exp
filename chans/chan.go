@@ -1,4 +1,4 @@
-package chans
+package errchan
 
 import (
 	"golang.org/x/sync/errgroup"
@@ -16,21 +16,23 @@ func (c Chan[T]) Recv() (T, error) {
 	return r.Value, r.Err
 }
 
+func (c Chan[T]) Do(f func() (T, error)) {
+	var r Result[T]
+	r.Value, r.Err = f()
+	c <- r
+}
+
 func (c Chan[T]) Go(g *errgroup.Group, f func() (T, error)) {
 	if g == nil {
-		go func() {
-			var r Result[T]
-			r.Value, r.Err = f()
-			c <- r
-		}()
-	} else {
-		g.Go(func() error {
-			var r Result[T]
-			r.Value, r.Err = f()
-			c <- r
-			return r.Err
-		})
+		go c.Do(f)
+		return
 	}
+	g.Go(func() error {
+		var r Result[T]
+		r.Value, r.Err = f()
+		c <- r
+		return r.Err
+	})
 }
 
 func Go[T any](g *errgroup.Group, f func() (T, error)) Chan[T] {
