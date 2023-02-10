@@ -1,8 +1,12 @@
 package chans
 
 import (
+	"errors"
+
 	"golang.org/x/sync/errgroup"
 )
+
+var ErrClosed = errors.New("errchan.Chan is closed")
 
 type Result[T any] struct {
 	Value T
@@ -12,7 +16,11 @@ type Result[T any] struct {
 type Chan[T any] chan Result[T]
 
 func (c Chan[T]) Recv() (T, error) {
-	r := <-c
+	r, ok := <-c
+	if !ok {
+		var z T
+		return z, ErrClosed
+	}
 	return r.Value, r.Err
 }
 
