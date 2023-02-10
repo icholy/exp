@@ -1,8 +1,6 @@
 package chans
 
 import (
-	"context"
-
 	"golang.org/x/sync/errgroup"
 )
 
@@ -22,7 +20,7 @@ func (c Chan[T]) Go(g *errgroup.Group, f func() (T, error)) {
 	g.Go(func() error {
 		var r Result[T]
 		r.Value, r.Err = f()
-		ch <- r
+		c <- r
 		return r.Err
 	})
 }
