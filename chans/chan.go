@@ -26,7 +26,7 @@ func (c Chan[T]) Go(g *errgroup.Group, f func() (T, error)) {
 }
 
 func Go[T any](g *errgroup.Group, f func() (T, error)) Chan[T] {
-	ch := make(Chan[T], 1)
-	ch.Go(g, f)
-	return ch
+	c := make(Chan[T], 1)
+	c.Go(g, f)
+	return c
 }
