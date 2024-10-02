@@ -70,6 +70,9 @@ func main() {
 			return err
 		}
 		if info.IsDir() {
+			if filepath.Base(path) == ".git" {
+				return filepath.SkipDir
+			}
 			return nil
 		}
 		var match bool
