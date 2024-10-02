@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"unicode/utf8"
 
 	gitignore "github.com/sabhiram/go-gitignore"
@@ -101,11 +102,19 @@ func main() {
 		if !IsText(content) {
 			return nil
 		}
-		fmt.Printf(
-			"File: %s\n\n```\n%s\n```\n",
-			path,
-			content,
-		)
+		if strings.ToLower(filepath.Ext(path)) == ".md" {
+			fmt.Printf(
+				"File: %s\n\n---\n%s\n---\n",
+				path,
+				content,
+			)
+		} else {
+			fmt.Printf(
+				"File: %s\n\n```\n%s\n```\n",
+				path,
+				content,
+			)
+		}
 		return nil
 	})
 	if err != nil {
