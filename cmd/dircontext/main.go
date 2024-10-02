@@ -83,7 +83,7 @@ func main() {
 				break
 			}
 		}
-		if !match {
+		if !match && len(patterns) > 0 {
 			return nil
 		}
 		for _, ignore := range ignores {
