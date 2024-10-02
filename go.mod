@@ -10,6 +10,7 @@ require (
 require golang.org/x/exp v0.0.0-20220613132600-b0d781184e0d
 
 require (
+	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.4.0 // indirect
